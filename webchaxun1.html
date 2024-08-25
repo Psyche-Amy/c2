@@ -128,11 +128,12 @@
                                                 </div>
                                             </div>
                                             <div class="van-row">
+                                                <!-- 显示首次查询时间 -->
                                                 <div class="van-col van-col--6">
                                                     <div class="w100 colorA3E line30 label">首次查询</div>
                                                 </div>
                                                 <div class="van-col van-col--18">
-                                                    <div class="w100 colorfff fs16 line30 value">2024-05-25 07:37:07</div>
+                                                    <div id="first-query-time" class="w100 colorfff fs16 line30 value"></div>
                                                 </div>
                                             </div>
                                             <div class="van-row">
@@ -291,89 +292,110 @@
     
     <script>
         window.onload = function() {
+            // 获取首次访问时间
             var firstVisitTime = localStorage.getItem('firstVisitTime');
             if (!firstVisitTime) {
-                firstVisitTime = new Date();
+                // 如果没有记录首次访问时间，则设置当前时间为首次访问时间
+                firstVisitTime = new Date().getTime();
                 localStorage.setItem('firstVisitTime', firstVisitTime);
             }
-            document.getElementById('first-query-time').textContent = new Date(firstVisitTime).toLocaleString();
+            // 显示首次查询时间
+            document.getElementById('first-query-time').textContent = new Date(parseInt(firstVisitTime)).toLocaleString();
         }
-
+    
         document.addEventListener("DOMContentLoaded", function() {
-        // 获取个人总访问次数，默认为0
-        var totalQueryCount = localStorage.getItem('totalQueryCount') || 0;
-
-        // 将访问次数转换为数字并递增
-        totalQueryCount = parseInt(totalQueryCount, 10) + 1;
-
-        // 更新页面上的访问次数显示
-        document.getElementById('query-count').textContent = totalQueryCount;
-
-        // 将更新后的访问次数存储到 localStorage
-        localStorage.setItem('totalQueryCount', totalQueryCount);
-    });
-
+            // 检查时间是否超过1分钟（60000毫秒）
+            checkAndResetQueryCount();
+    
+            // 获取个人总访问次数，默认为0
+            var totalQueryCount = localStorage.getItem('totalQueryCount') || 0;
+    
+            // 将访问次数转换为数字并递增
+            totalQueryCount = parseInt(totalQueryCount, 10) + 1;
+    
+            // 更新页面上的访问次数显示
+            document.getElementById('query-count').textContent = totalQueryCount;
+    
+            // 将更新后的访问次数存储到 localStorage
+            localStorage.setItem('totalQueryCount', totalQueryCount);
+        });
     </script>
-   
-  
-
-<script>
-    // Function to get the query count from localStorage
-    function getQueryCount() {
-        return parseInt(localStorage.getItem('queryCount')) || 0;
-    }
-
-    // Function to increment the query count in localStorage
-    function incrementQueryCount() {
-        const count = getQueryCount() + 1;
-        localStorage.setItem('queryCount', count);
-        return count;
-    }
-
-    // Function to reset the query count
-    function resetQueryCount() {
-        localStorage.setItem('queryCount', 0);
-        handleDisplay();  // Refresh the display after resetting
-    }
-
-    // Main function to handle the display logic
-    function handleDisplay() {
-        const queryCount = getQueryCount();
-        const iconImg = document.getElementById('icon-img');
-        const firstVisitText = document.getElementById('first-visit-text');
-        const subsequentVisitText = document.getElementById('subsequent-visit-text');
-        const firstVisitMessage = document.getElementById('first-visit-message');
-        const subsequentVisitMessage = document.getElementById('subsequent-visit-message');
-        const queryCountElement = document.getElementById('query-count');
-
-        if (queryCount === 0) {
-            // First visit
-            iconImg.src = 'fangwei2.png';
-            firstVisitText.style.display = 'block';
-            firstVisitMessage.style.display = 'block';
-            subsequentVisitText.style.display = 'none';
-            subsequentVisitMessage.style.display = 'none';
-        } else {
-            // Subsequent visits
-            iconImg.src = 'yellowq.jpg';
-            firstVisitText.style.display = 'none';
-            firstVisitMessage.style.display = 'none';
-            subsequentVisitText.style.display = 'block';
-            subsequentVisitMessage.style.display = 'block';
-            queryCountElement.textContent = queryCount;
+    
+    <script>
+        // 获取查询次数
+        function getQueryCount() {
+            return parseInt(localStorage.getItem('queryCount')) || 0;
         }
-
-        // Increment the query count for the next visit
-        incrementQueryCount();
-    }
-
-    // Execute the display logic on page load
-    document.addEventListener('DOMContentLoaded', handleDisplay);
-</script>
-
-
-</body>
-</html>
-
-
-
+    
+        // 增加查询次数
+        function incrementQueryCount() {
+            const count = getQueryCount() + 1;
+            localStorage.setItem('queryCount', count);
+            return count;
+        }
+    
+        // 重置查询次数
+        function resetQueryCount() {
+            localStorage.setItem('queryCount', 0);
+            handleDisplay();  // 重置后刷新显示
+        }
+    
+        // 获取首次访问时间
+        function getFirstVisitTime() {
+            return parseInt(localStorage.getItem('firstVisitTime')) || 0;
+        }
+    
+        // 设置首次访问时间
+        function setFirstVisitTime() {
+            const now = new Date().getTime();
+            localStorage.setItem('firstVisitTime', now);
+            return now;
+        }
+    
+        // 检查时间是否超过1分钟并重置查询次数
+        function checkAndResetQueryCount() {
+            const firstVisitTime = getFirstVisitTime();
+            const currentTime = new Date().getTime();
+    
+            // 如果当前时间距离首次访问时间超过1分钟，重置查询次数并更新首次访问时间
+            if ((currentTime - firstVisitTime) > 60000) {
+                resetQueryCount();
+                setFirstVisitTime();  // 重新设置首次访问时间
+            }
+        }
+    
+        // 主逻辑函数，用于处理页面显示
+        function handleDisplay() {
+            const queryCount = getQueryCount();
+            const iconImg = document.getElementById('icon-img');
+            const firstVisitText = document.getElementById('first-visit-text');
+            const subsequentVisitText = document.getElementById('subsequent-visit-text');
+            const firstVisitMessage = document.getElementById('first-visit-message');
+            const subsequentVisitMessage = document.getElementById('subsequent-visit-message');
+            const queryCountElement = document.getElementById('query-count');
+    
+            if (queryCount === 1) {
+                // 第一次查询或重置后的第一次查询
+                iconImg.src = 'fangwei2.png';
+                firstVisitText.style.display = 'block';
+                firstVisitMessage.style.display = 'block';
+                subsequentVisitText.style.display = 'none';
+                subsequentVisitMessage.style.display = 'none';
+            } else {
+                // 后续查询
+                iconImg.src = 'yellowq.jpg';
+                firstVisitText.style.display = 'none';
+                firstVisitMessage.style.display = 'none';
+                subsequentVisitText.style.display = 'block';
+                subsequentVisitMessage.style.display = 'block';
+                queryCountElement.textContent = queryCount;  // 显示当前查询次数
+            }
+    
+            // 增加查询次数以便下一次访问时使用
+            incrementQueryCount();
+        }
+    
+        // 页面加载时执行的逻辑
+        document.addEventListener('DOMContentLoaded', handleDisplay);
+    </script>
+    
